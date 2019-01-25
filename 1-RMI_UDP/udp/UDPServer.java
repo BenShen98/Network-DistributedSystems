@@ -9,61 +9,109 @@ import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.util.Arrays;
+import java.nio.charset.StandardCharsets;
 
 import common.MessageInfo;
 
 public class UDPServer {
 
+	// define constant
+	private static final int bufSize=1000;
+	private static final int timeout=20000;
+	private static final int maxContinuousExceptionCount=3; //prevent infinite loop
+
 	private DatagramSocket recvSoc;
 	private int totalMessages = -1;
+	private int countdownMessages = -1;
 	// private int[] receivedMessages;
 	private boolean[] receivedMsg = null; //ptr
 	// private boolean close;
-	private boolean finish=false;
+	private int ExcpetionCount=0;
+	private boolean terminate=false;
 
 
 	private void run() {
 		int				pacSize;
 		byte[]			pacData;
 		DatagramPacket 	pac;
+		byte[] buffer=new byte[bufSize];
 
 		// Receive the messages and process them by calling processMessage(...).
-		while(!finish){
+		while(!terminate && ExcpetionCount<maxContinuousExceptionCount){
+			try{
+				pac=new DatagramPacket(buffer,bufSize);
+				recvSoc.receive(pac); //block receive
+				String serialized=new String(pac.getData(),StandardCharsets.US_ASCII);
+				// serialized.replaceAll("\\r\\n|\\r|\\n", "");
+				// System.err.printf("%s%s",pac.getData());
 
+				processMessage(serialized);
+
+				ExcpetionCount=0; //reset timeout counter
+			}catch(SocketException e){System.out.println("Socket: "+e.getMessage());
+		}catch(IOException e){
+			System.out.println("IO: "+e.getMessage());
+			ExcpetionCount++;
+			}
 		}
 
+
+		//print out data
+		System.out.println("### missed packet ###");
+		for( int i=0; i<totalMessages; i++){
+			if(!receivedMsg[i]){
+				System.out.printf("%d,",i);
+			}
+		}
+		System.out.println("### end of missed packet ###");
+
+		//return code (return msg not sent)
+		System.exit(countdownMessages); //only display last byte
 
 	}
 
 	public void processMessage(String data) {
 
+
 		MessageInfo msg = null;
 
 		// Use the data to construct a new MessageInfo object
-		msg = MessageInfo(data);
+		try{
+			msg = new MessageInfo(data);
 
-		// On receipt of first message, initialise the receive buffer
-		if(totalMessages==-1){
-			totalMessages=msg.totalMessages;
-			receivedMsg=new boolean[totalMessages];
+			// On receipt of first message, initialise the receive buffer
+			if(totalMessages==-1){
+				totalMessages=msg.totalMessages;
+				receivedMsg=new boolean[totalMessages];
+				countdownMessages=totalMessages;
+			}
+
+			// Log receipt of the message, index&count start from 0
+			System.out.printf("%d,",msg.messageNum);
+			receivedMsg[msg.messageNum]=true;
+			countdownMessages--;
+
+			// If this is the last expected message, then identify
+			//        any missing messages
+			if(countdownMessages==0){
+				terminate=true;
+			}
+		}catch(Exception e){
+			System.err.println("ignored: "+e.getMessage());
 		}
-
-		// Log receipt of the message, index&count start from 0
-		System.out.printf("%d,",msg.messageNum);
-		receivedMsg[msg.messageNum]=true;
-
-		// ??? msg may not arrive in order !!!
-		// If this is the last expected message, then identify
-		//        any missing messages
 
 	}
 
 
 	public UDPServer(int rp) {
-		// Initialise UDP socket for receiving data
-		recvSoc = new DatagramSocket(rp);
-		// Use a timeout (e.g. 30 secs) to ensure the program doesn't block forever
-		receSoc.setSoTimeout(30000);
+		// Initialise UDP socket for receiving data.
+		try{
+			recvSoc = new DatagramSocket(rp);
+			// Use a timeout (e.g. 30 secs) to ensure the program doesn't block forever
+			recvSoc.setSoTimeout(timeout);
+		}catch(SocketException e){System.out.println("Socket: "+e.getMessage());
+		}
+
 
 		// Done Initialisation
 		System.out.println("UDPServer ready");
@@ -80,7 +128,7 @@ public class UDPServer {
 		recvPort = Integer.parseInt(args[0]);
 
 		// Construct Server object and start it by calling run().
-			UDPServer server=UDPServer(recvPort);
+			UDPServer server = new UDPServer(recvPort);
 			server.run();
 
 

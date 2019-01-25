@@ -23,16 +23,17 @@ public class MessageInfo implements Serializable {
 		messageNum = msgNum;
 	}
 
-	public MessageInfo(String msg) throws Exception {
+	public MessageInfo(String msg) throws Exception{
+
 		String[] fields = msg.split(";");
-		if (fields.length!=2)
+		if (fields.length!=3)
 			throw new Exception("MessageInfo: Invalid string for message construction: " + msg);
 		totalMessages = Integer.parseInt(fields[0]);
 		messageNum = Integer.parseInt(fields[1]);
 	}
 
 	public String toString(){
-		return new String(totalMessages+";"+messageNum+"\n");
+		return new String(totalMessages+";"+messageNum+"; "); //last ; used remove noise
 	}
 
 

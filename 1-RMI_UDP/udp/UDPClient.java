@@ -9,13 +9,12 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
+
 
 import common.MessageInfo;
 
 public class UDPClient {
-
-	private DatagramSocket sendSoc;
-
 	public static void main(String[] args) {
 		InetAddress	serverAddr = null;
 		int			recvPort;
@@ -38,17 +37,35 @@ public class UDPClient {
 		countTo = Integer.parseInt(args[2]);
 
 
-		// TO-DO: Construct UDP client class and try to send messages
+		// Construct UDP client class and try to send messages
+		UDPClientInst client= new UDPClientInst();
+		client.testLoop(serverAddr,recvPort,countTo);
+	}
+}
+
+
+class UDPClientInst{
+
+	private DatagramSocket sendSoc;
+
+	public UDPClientInst() {
+		// Initialise the UDP socket for sending data
+		try{
+			sendSoc=new DatagramSocket();
+		}catch(SocketException e){
+			System.out.println("Socket: " + e.getMessage());
+		}
 	}
 
-	public UDPClient() {
-		// TO-DO: Initialise the UDP socket for sending data
-	}
+	public void testLoop(InetAddress serverAddr, int recvPort, int countTo) {
+		//Send the messages to the server
+		for(int tries=0; tries<countTo; tries++){
+			MessageInfo msg = new MessageInfo(countTo,tries);
+			send(msg.toString(), serverAddr, recvPort);
+		}
 
-	private void testLoop(InetAddress serverAddr, int recvPort, int countTo) {
-		int				tries = 0;
-
-		// TO-DO: Send the messages to the server
+		//close socket
+		sendSoc.close();
 	}
 
 	private void send(String payload, InetAddress destAddr, int destPort) {
@@ -56,6 +73,18 @@ public class UDPClient {
 		byte[]				pktData;
 		DatagramPacket		pkt;
 
-		// TO-DO: build the datagram packet and send it to the server
+		// build the datagram packet and send it to the server
+		try{
+		pktData=payload.getBytes(StandardCharsets.US_ASCII);
+		payloadSize=pktData.length;
+		pkt=new DatagramPacket(pktData, payloadSize, destAddr, destPort);
+
+		String str=new String(pkt.getData(),StandardCharsets.US_ASCII);
+		System.out.printf("%s",str);
+
+			sendSoc.send(pkt);
+		}catch(IOException e){
+			System.out.println("IO: " + e.getMessage());
+		}
 	}
 }
