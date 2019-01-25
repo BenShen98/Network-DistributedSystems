@@ -16,16 +16,22 @@ public class UDPServer {
 
 	private DatagramSocket recvSoc;
 	private int totalMessages = -1;
-	private int[] receivedMessages;
-	private boolean close;
+	// private int[] receivedMessages;
+	private boolean[] receivedMsg = null; //ptr
+	// private boolean close;
+	private boolean finish=false;
+
 
 	private void run() {
 		int				pacSize;
 		byte[]			pacData;
 		DatagramPacket 	pac;
 
-		// TO-DO: Receive the messages and process them by calling processMessage(...).
-		//        Use a timeout (e.g. 30 secs) to ensure the program doesn't block forever
+		// Receive the messages and process them by calling processMessage(...).
+		while(!finish){
+
+		}
+
 
 	}
 
@@ -33,20 +39,31 @@ public class UDPServer {
 
 		MessageInfo msg = null;
 
-		// TO-DO: Use the data to construct a new MessageInfo object
+		// Use the data to construct a new MessageInfo object
+		msg = MessageInfo(data);
 
-		// TO-DO: On receipt of first message, initialise the receive buffer
+		// On receipt of first message, initialise the receive buffer
+		if(totalMessages==-1){
+			totalMessages=msg.totalMessages;
+			receivedMsg=new boolean[totalMessages];
+		}
 
-		// TO-DO: Log receipt of the message
+		// Log receipt of the message, index&count start from 0
+		System.out.printf("%d,",msg.messageNum);
+		receivedMsg[msg.messageNum]=true;
 
-		// TO-DO: If this is the last expected message, then identify
+		// ??? msg may not arrive in order !!!
+		// If this is the last expected message, then identify
 		//        any missing messages
 
 	}
 
 
 	public UDPServer(int rp) {
-		// TO-DO: Initialise UDP socket for receiving data
+		// Initialise UDP socket for receiving data
+		recvSoc = new DatagramSocket(rp);
+		// Use a timeout (e.g. 30 secs) to ensure the program doesn't block forever
+		receSoc.setSoTimeout(30000);
 
 		// Done Initialisation
 		System.out.println("UDPServer ready");
@@ -62,7 +79,11 @@ public class UDPServer {
 		}
 		recvPort = Integer.parseInt(args[0]);
 
-		// TO-DO: Construct Server object and start it by calling run().
+		// Construct Server object and start it by calling run().
+			UDPServer server=UDPServer(recvPort);
+			server.run();
+
+
 	}
 
 }
