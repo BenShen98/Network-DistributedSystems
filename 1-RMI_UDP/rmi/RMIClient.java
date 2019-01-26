@@ -7,6 +7,9 @@ import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+
 import common.MessageInfo;
 
 public class RMIClient {
@@ -24,7 +27,7 @@ public class RMIClient {
 			System.exit(-1);
 		}
 
-		String urlServer = new String("rmi://" + args[0] + ":1099/RMIServer");
+		String urlServer = new String("rmi://localhost/RMIServer");
 		int countTo = Integer.parseInt(args[1]);
 
 		// Initialise Security Manager
@@ -34,7 +37,8 @@ public class RMIClient {
 			}
 
 			// Bind to RMIServer
-			server = (RMIServerI) Naming.lookup(urlServer);
+			Registry registry = LocateRegistry.getRegistry("localhost", 1099);
+			server = (RMIServerI) registry.lookup(urlServer);
 
 			//Attempt to send messages the specified number of times
 
