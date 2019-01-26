@@ -48,7 +48,7 @@ public class UDPClient {
 class UDPClientInst{
 
 	private DatagramSocket sendSoc;
-	private static int sleepMilli=0;
+	private static final int sleepMilli=0;
 
 	public UDPClientInst() {
 		// Initialise the UDP socket for sending data

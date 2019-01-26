@@ -6,6 +6,7 @@ package rmi;
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.Arrays;
@@ -14,45 +15,69 @@ import common.*;
 
 public class RMIServer extends UnicastRemoteObject implements RMIServerI {
 
+	private static final String serverURL="rmi://localhost/RMIServer";
+
 	private int totalMessages = -1;
-	private int[] receivedMessages;
+	// private boolean[] receivedMsg = null; //ptr
+
 
 	public RMIServer() throws RemoteException {
+		super();
 	}
 
 	public void receiveMessage(MessageInfo msg) throws RemoteException {
 
-		// TO-DO: On receipt of first message, initialise the receive buffer
+		// On receipt of first message, initialise the receive buffer
+		if(totalMessages==-1){
+			totalMessages=msg.totalMessages;
+			// receivedMsg=new boolean[totalMessages];
+		}
 
-		// TO-DO: Log receipt of the message
+		// Log receipt of the message, index&count start from 0
+		System.out.printf("%d,",msg.messageNum);
+		// receivedMsg[msg.messageNum]=true;
 
-		// TO-DO: If this is the last expected message, then identify
-		//        any missing messages
+		// If this is the last expected message, then exit
+		// RMI is based on TCP, order guaranteed
+		if(msg.totalMessages-msg.messageNum==0){
+			System.exit(0);
+		}
 
 	}
 
 
 	public static void main(String[] args) {
+			RMIServer rmis = null;
 
-		RMIServer rmis = null;
+			// Initialise Security Manager
+			if (System.getSecurityManager() == null) {
+				System.setSecurityManager (new SecurityManager ());
+			}
 
-		// TO-DO: Initialise Security Manager
+			try{
+			// Instantiate the server class
+			rmis = new RMIServer();// remote as it extend UnicastRemoteObject
+			// RMIServer stub = (RMIServer) UnicastRemoteObject.exportObject(server, 0);
 
-		// TO-DO: Instantiate the server class
-
-		// TO-DO: Bind to RMI registry
-
+			// Bind to RMI registry
+			rebindServer(serverURL, rmis);
+		}catch(Exception e){
+			System.err.println("Server creation exception:"+e);
+      // e.printStackTrace();
+		}
 	}
 
-	protected static void rebindServer(String serverURL, RMIServer server) {
+	protected static void rebindServer(String serverURL, RMIServer server) throws Exception {
 
-		// TO-DO:
+		// create registry if not runing
 		// Start / find the registry (hint use LocateRegistry.createRegistry(...)
 		// If we *know* the registry is running we could skip this (eg run rmiregistry in the start script)
 
-		// TO-DO:
 		// Now rebind the server to the registry (rebind replaces any existing servers bound to the serverURL)
 		// Note - Registry.rebind (as returned by createRegistry / getRegistry) does something similar but
 		// expects different things from the URL field.
+		Registry registry = LocateRegistry.getRegistry();
+		registry.rebind(serverURL, server);
+		System.out.println("Server bound, exit main");
 	}
 }

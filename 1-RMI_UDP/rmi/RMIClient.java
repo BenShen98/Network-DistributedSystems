@@ -11,9 +11,12 @@ import common.MessageInfo;
 
 public class RMIClient {
 
+	private static final int sleepMilli=0;
+
+
 	public static void main(String[] args) {
 
-		RMIServerI iRMIServer = null;
+		RMIServerI server = null;
 
 		// Check arguments for Server host and number of messages
 		if (args.length < 2){
@@ -21,14 +24,28 @@ public class RMIClient {
 			System.exit(-1);
 		}
 
-		String urlServer = new String("rmi://" + args[0] + "/RMIServer");
-		int numMessages = Integer.parseInt(args[1]);
+		String urlServer = new String("rmi://" + args[0] + ":1099/RMIServer");
+		int countTo = Integer.parseInt(args[1]);
 
-		// TO-DO: Initialise Security Manager
+		// Initialise Security Manager
+		try{
+			if (System.getSecurityManager() == null) {
+				System.setSecurityManager (new SecurityManager ());
+			}
 
-		// TO-DO: Bind to RMIServer
+			// Bind to RMIServer
+			server = (RMIServerI) Naming.lookup(urlServer);
 
-		// TO-DO: Attempt to send messages the specified number of times
+			//Attempt to send messages the specified number of times
 
+			for(int tries=0; tries<countTo; tries++){
+				MessageInfo msg = new MessageInfo(countTo,tries);
+				server.receiveMessage(msg);
+				Thread.sleep(sleepMilli);
+			}
+
+	}catch(Exception e){
+		System.out.println("Exception:"+e);
+	}
 	}
 }
