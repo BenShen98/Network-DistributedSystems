@@ -10,6 +10,7 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.TimeUnit;
 
 
 import common.MessageInfo;
@@ -47,6 +48,7 @@ public class UDPClient {
 class UDPClientInst{
 
 	private DatagramSocket sendSoc;
+	private static int sleepMilli=0;
 
 	public UDPClientInst() {
 		// Initialise the UDP socket for sending data
@@ -59,9 +61,14 @@ class UDPClientInst{
 
 	public void testLoop(InetAddress serverAddr, int recvPort, int countTo) {
 		//Send the messages to the server
-		for(int tries=0; tries<countTo; tries++){
-			MessageInfo msg = new MessageInfo(countTo,tries);
-			send(msg.toString(), serverAddr, recvPort);
+		try {
+			for(int tries=0; tries<countTo; tries++){
+				MessageInfo msg = new MessageInfo(countTo,tries);
+				send(msg.toString(), serverAddr, recvPort);
+				Thread.sleep(sleepMilli);
+			}
+		}catch(InterruptedException ex){
+			Thread.currentThread().interrupt();
 		}
 
 		//close socket

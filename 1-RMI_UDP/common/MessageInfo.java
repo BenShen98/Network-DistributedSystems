@@ -33,8 +33,6 @@ public class MessageInfo implements Serializable {
 	}
 
 	public String toString(){
-		return new String(totalMessages+";"+messageNum+"; "); //last ; used remove noise
+		return new String(totalMessages+";"+messageNum+"; "); //last `;` used remove noise
 	}
-
-
 }

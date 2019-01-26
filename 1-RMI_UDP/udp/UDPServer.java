@@ -23,9 +23,7 @@ public class UDPServer {
 	private DatagramSocket recvSoc;
 	private int totalMessages = -1;
 	private int countdownMessages = -1;
-	// private int[] receivedMessages;
 	private boolean[] receivedMsg = null; //ptr
-	// private boolean close;
 	private int ExcpetionCount=0;
 	private boolean terminate=false;
 
@@ -42,9 +40,6 @@ public class UDPServer {
 				pac=new DatagramPacket(buffer,bufSize);
 				recvSoc.receive(pac); //block receive
 				String serialized=new String(pac.getData(),StandardCharsets.US_ASCII);
-				// serialized.replaceAll("\\r\\n|\\r|\\n", "");
-				// System.err.printf("%s%s",pac.getData());
-
 				processMessage(serialized);
 
 				ExcpetionCount=0; //reset timeout counter
@@ -54,7 +49,6 @@ public class UDPServer {
 			ExcpetionCount++;
 			}
 		}
-
 
 		//print out data
 		System.out.println("### missed packet ###");
@@ -91,8 +85,7 @@ public class UDPServer {
 			receivedMsg[msg.messageNum]=true;
 			countdownMessages--;
 
-			// If this is the last expected message, then identify
-			//        any missing messages
+			// If this is the last expected message, then exit
 			if(countdownMessages==0){
 				terminate=true;
 			}
