@@ -12,7 +12,7 @@ import common.*;
 
 public class RMIServer extends UnicastRemoteObject implements RMIServerI {
 
- private static final String serverURL = "rmi://localhost/RMIServer";
+ private static final String serverURL = "rmi://RMIServer";
  private static final int registryPort = 1099;
 
  private int totalMessages = -1;

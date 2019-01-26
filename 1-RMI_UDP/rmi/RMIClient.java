@@ -25,7 +25,7 @@ public class RMIClient {
    System.exit(-1);
   }
 
-  String urlServer = new String("rmi://" + args[0] + "/RMIServer");
+  String urlServer = new String("rmi://RMIServer");
   int countTo = Integer.parseInt(args[1]);
 
   // Initialise Security Manager
