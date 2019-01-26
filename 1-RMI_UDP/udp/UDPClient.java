@@ -61,17 +61,14 @@ class UDPClientInst {
  }
 
  public void testLoop(InetAddress serverAddr, int recvPort, int countTo) {
-	 
+
   //Send the messages to the server
-  try {
    for (int tries = 0; tries < countTo; tries++) {
     MessageInfo msg = new MessageInfo(countTo, tries);
     send(msg.toString(), serverAddr, recvPort);
-    Thread.sleep(sleepMilli);
+    idel(sleepMilli);
    }
-  } catch (InterruptedException ex) {
-   Thread.currentThread().interrupt();
-  }
+
 
   //close socket
   sendSoc.close();
@@ -95,5 +92,13 @@ class UDPClientInst {
   } catch (IOException e) {
    System.out.println("IO: " + e.getMessage());
   }
+ }
+
+ private static void idel(int milli) {
+	try {
+	 Thread.sleep(milli);
+	} catch (InterruptedException ex) {
+	 Thread.currentThread().interrupt();
+	}
  }
 }

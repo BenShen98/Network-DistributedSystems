@@ -69,4 +69,5 @@ public class RMIServer extends UnicastRemoteObject implements RMIServerI {
   Registry registry = LocateRegistry.createRegistry(registryPort);
   registry.bind(serverURL, server);
  }
+
 }

@@ -2,16 +2,17 @@ package rmi;
 
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
+import java.io.EOFException;
 import java.rmi.RemoteException;
-
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.util.concurrent.TimeUnit;
 
 import common.MessageInfo;
 
 public class RMIClient {
 
- private static final int sleepMilli = 0;
+ private static final int sleepMilli = 100;
  private static final int registryPort = 1099;
 
  public static void main(String[] args) {
@@ -41,11 +42,26 @@ public class RMIClient {
    for (int tries = 0; tries < countTo; tries++) {
     MessageInfo msg = new MessageInfo(countTo, tries);
     server.receiveMessage(msg);
-    Thread.sleep(sleepMilli);
+    idel(sleepMilli);
    }
+   System.out.println("");
 
   } catch (Exception e) {
-   System.out.println("Exception:" + e);
+   if (e.getCause() instanceof EOFException) {
+    //server received all file, shutdown
+    System.out.println("All message transmited, Server shutdown");
+    System.exit(0);
+   } else {
+    System.out.println("Exception:" + e);
+   }
+  }
+ }
+
+ private static void idel(int milli) {
+  try {
+   Thread.sleep(milli);
+  } catch (InterruptedException ex) {
+   Thread.currentThread().interrupt();
   }
  }
 }
