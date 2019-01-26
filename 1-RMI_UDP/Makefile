@@ -19,7 +19,6 @@ udp:
 	javac -g -classpath . *.java; \
 	cd ../udp; \
 	javac -g -classpath .:.. *.java; \
-	cd ..; java udp.UDPServer 6666
 
 
 .PHONY : clean
