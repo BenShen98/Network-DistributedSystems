@@ -1,6 +1,3 @@
-/*
- * Created on 01-Mar-2016
- */
 package rmi;
 
 import java.net.MalformedURLException;
@@ -15,76 +12,61 @@ import common.*;
 
 public class RMIServer extends UnicastRemoteObject implements RMIServerI {
 
-	private static final String serverURL="rmi://localhost/RMIServer";
+ private static final String serverURL = "rmi://localhost/RMIServer";
+ private static final int registryPort = 1099;
 
-	private int totalMessages = -1;
-	// private boolean[] receivedMsg = null; //ptr
-
-
-	public RMIServer() throws RemoteException {
-		super();
-	}
-
-	public void receiveMessage(MessageInfo msg) throws RemoteException {
-
-		// On receipt of first message, initialise the receive buffer
-		if(totalMessages==-1){
-			totalMessages=msg.totalMessages;
-			// receivedMsg=new boolean[totalMessages];
-		}
-
-		// Log receipt of the message, index&count start from 0
-		System.out.printf("%d,",msg.messageNum);
-		// receivedMsg[msg.messageNum]=true;
-
-		// If this is the last expected message, then exit
-		// RMI is based on TCP, order guaranteed
-		if(msg.totalMessages-msg.messageNum==0){
-			System.exit(0);
-		}
-
-	}
+ private int totalMessages = -1;
+ private int msgCounter = 0;
 
 
-	public static void main(String[] args) {
-			RMIServer rmis = null;
+ public RMIServer() throws RemoteException {
+  super();
+ }
 
-			// Initialise Security Manager
-			if (System.getSecurityManager() == null) {
-				System.setSecurityManager (new SecurityManager ());
-			}
+ public void receiveMessage(MessageInfo msg) throws RemoteException {
 
-			try{
-			// Instantiate the server class
-			rmis = new RMIServer();// remote as it extend UnicastRemoteObject
-			// RMIServer stub = (RMIServer) UnicastRemoteObject.exportObject(server, 0);
+  // On receipt of first message, initialise the receive buffer
+  if (totalMessages == -1) {
+   totalMessages = msg.totalMessages;
+  }
 
-			// Bind to RMI registry
-			rebindServer(serverURL, rmis);
+  // Log receipt of the message, index&count start from 0
+  System.out.printf("%d,", msg.messageNum);
+  msgCounter++;
 
-		}catch(Exception e){
-			System.err.println("Server creation exception:"+e);
-      // e.printStackTrace();
-		}
-	}
+  // If this is the last expected message, then exit
+  // (RMI is based on TCP, order guaranteed)
+  if (msg.totalMessages - msg.messageNum == 1) {
+   System.out.println("\n*** " + msgCounter + " messages received ***");
+   System.exit(0);
+  }
 
-	protected static void rebindServer(String serverURL, RMIServer server) throws Exception {
+ }
 
-		// create registry if not runing
-		// Start / find the registry (hint use LocateRegistry.createRegistry(...)
-		// If we *know* the registry is running we could skip this (eg run rmiregistry in the start script)
 
-		// Now rebind the server to the registry (rebind replaces any existing servers bound to the serverURL)
-		// Note - Registry.rebind (as returned by createRegistry / getRegistry) does something similar but
-		// expects different things from the URL field.
-		Registry registry = LocateRegistry.createRegistry(1099);
-		registry.bind(serverURL, server);
-		RMIServerI serverx = (RMIServerI) registry.lookup("rmi://localhost/RMIServer");
-		System.out.println(serverURL);
+ public static void main(String[] args) {
+  RMIServer rmis = null;
 
-		MessageInfo msg = new MessageInfo(1,0);
-		serverx.receiveMessage(msg);
+  // Initialise Security Manager
+  if (System.getSecurityManager() == null) {
+   System.setSecurityManager(new SecurityManager());
+  }
 
-		System.out.println("Server bound, exit main");
-	}
+  try {
+   // Instantiate the server class
+   rmis = new RMIServer(); // remote as it extend UnicastRemoteObject
+
+   // Bind to RMI registry
+   rebindServer(serverURL, rmis);
+   System.out.println("Server bound, exit main");
+
+  } catch (Exception e) {
+   System.err.println("Server creation exception:" + e);
+  }
+ }
+
+ protected static void rebindServer(String serverURL, RMIServer server) throws Exception {
+  Registry registry = LocateRegistry.createRegistry(registryPort);
+  registry.bind(serverURL, server);
+ }
 }
