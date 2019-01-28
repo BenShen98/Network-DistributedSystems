@@ -15,14 +15,15 @@ public class UDPServer {
  // Define constant
  private static final int bufSize = 1000;
  private static final int timeout = 20000;
- private static final int maxContinuousExceptionCount = 3;
 
  private DatagramSocket recvSoc;
  private int totalMessages = -1;
  private int countdownMessages = -1;
  private boolean[] receivedMsg = null; //ptr
- private int ExcpetionCount = 0;
  private boolean terminate = false;
+
+ private long firstMsgT;
+ private long lastMsgT;
 
 
  private void run() {
@@ -33,28 +34,33 @@ public class UDPServer {
 
   // Receive the messages and process them by calling processMessage(...).
 	// shutdown server when no. of continuous (timeout) exception exceed maxContinuousExceptionCount
-  while (!terminate && ExcpetionCount < maxContinuousExceptionCount) {
+  while (!terminate) {
    try {
     pac = new DatagramPacket(buffer, bufSize);
     recvSoc.receive(pac); //block receive
-    String serialized = new String(pac.getData(), StandardCharsets.US_ASCII);
+    String serialized = new String(pac.getData(),0,pac.getLength(), StandardCharsets.US_ASCII);
     processMessage(serialized);
-    ExcpetionCount = 0; //reset timeout counter
 
    } catch (Exception e) {
     System.out.println("Exception: " + e.getMessage());
-    ExcpetionCount++;
+    terminate=true; //timeout, terminate server
    }
   }
 
   //print out missing packet
-  System.out.println("### missed packet ###");
+  System.out.println("\n\n### missed packet ###");
   for (int i = 0; i < totalMessages; i++) {
    if (!receivedMsg[i]) {
     System.out.printf("%d,", i);
    }
   }
-  System.out.println("### end of missed packet ###");
+  System.out.printf("\n### end of missed packet, %d missed in total ###", countdownMessages);
+  System.out.printf("\nfirst message received at %d ns", firstMsgT);
+  System.out.printf("\nlast message received at %d ns", lastMsgT);
+  System.out.printf("\ntime diff is %d ns\n", lastMsgT-firstMsgT);
+
+
+
 
   //return code (return no. of message lost)
   System.exit(countdownMessages); //will only display last byte
@@ -71,6 +77,7 @@ public class UDPServer {
 
    // On receipt of first message, initialise the receive buffer
    if (totalMessages == -1) {
+    firstMsgT=System.nanoTime();
     totalMessages = msg.totalMessages;
     receivedMsg = new boolean[totalMessages];
     countdownMessages = totalMessages;
@@ -79,6 +86,7 @@ public class UDPServer {
    // Log receipt of the message, (index&count start from 0)
    System.out.printf("%d,", msg.messageNum);
    receivedMsg[msg.messageNum] = true;
+   lastMsgT=System.nanoTime();
    countdownMessages--;
 
    // If this is the last expected message, then exit
@@ -86,7 +94,7 @@ public class UDPServer {
     terminate = true;
    }
   } catch (Exception e) {
-   System.err.println("ignored: " + e.getMessage());
+   System.out.println("ignored: " + e.getMessage());
   }
 
  }
@@ -111,7 +119,7 @@ public class UDPServer {
 
   // Get the parameters from command line
   if (args.length < 1) {
-   System.err.println("Arguments required: recv port");
+   System.out.println("Arguments required: recv port");
    System.exit(-1);
   }
   recvPort = Integer.parseInt(args[0]);

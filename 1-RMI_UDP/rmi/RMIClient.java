@@ -15,9 +15,12 @@ public class RMIClient {
  private static final int sleepMilli = 100;
  private static final int registryPort = 1099;
 
+
  public static void main(String[] args) {
 
   RMIServerI server = null;
+  long firstMsgT;
+  long lastMsgT;
 
   // Check arguments for Server host and number of messages
   if (args.length < 2) {
@@ -29,6 +32,7 @@ public class RMIClient {
   int countTo = Integer.parseInt(args[1]);
 
   // Initialise Security Manager
+  firstMsgT=System.nanoTime();
   try {
    if (System.getSecurityManager() == null) {
     System.setSecurityManager(new SecurityManager());
@@ -44,13 +48,17 @@ public class RMIClient {
     server.receiveMessage(msg);
     idel(sleepMilli);
    }
-   System.out.println("");
 
   } catch (Exception e) {
    if (e.getCause() instanceof EOFException) {
     //server received all file, shutdown
-    System.out.println("All message transmited, Server shutdown");
+    lastMsgT=System.nanoTime();
+    System.out.printf("\nfirst message received at %d ns", firstMsgT);
+    System.out.printf("\nlast message received at %d ns", lastMsgT);
+    System.out.printf("\ntime diff is %d ns\n", lastMsgT-firstMsgT);
+
     System.exit(0);
+
    } else {
     System.out.println("Exception:" + e);
    }
