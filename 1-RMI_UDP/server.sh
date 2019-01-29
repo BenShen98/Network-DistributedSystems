@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# msgSizes=(20 200 300 400 1000 2000 3000 4000 5000)
-msgSizes=(20 200)
-repeat=2
+msgSizes=(20 200 300 400 1000 2000 3000 4000 5000)
+# msgSizes=(20 200)
+repeat=5
 
 rm -f log/server.csv
 rm -f log/server*.log
