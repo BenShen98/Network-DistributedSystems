@@ -19,8 +19,8 @@ public class UDPClient {
   int countTo;
   String message;
 
-  long firstMsgT;
-  long lastMsgT;
+  long startT;
+  long endT;
 
   // Get the parameters
   if (args.length < 3) {
@@ -42,15 +42,15 @@ public class UDPClient {
   // Construct UDP client class and try to send messages
   UDPClientInst client = new UDPClientInst();
 
-  firstMsgT=System.nanoTime();
+  startT=System.currentTimeMillis();
   client.testLoop(serverAddr, recvPort, countTo);
-  lastMsgT=System.nanoTime();
+  endT=System.currentTimeMillis();
 
-  System.out.printf("\nfirst message received at %d ns", firstMsgT);
-  System.out.printf("\nlast message received at %d ns", lastMsgT);
-  System.out.printf("\ntime diff is %d ns\n", lastMsgT-firstMsgT);
+  System.out.printf("\nfirst message received at %d ns", startT);
+  System.out.printf("\nlast message received at %d ns", endT);
+  System.out.printf("\ntime diff is %d ns\n", endT-startT);
 
-  System.err.printf("udp,%d,%d,%d,\n",firstMsgT,lastMsgT,countTo);
+  System.err.printf("udp,%d,%d,%d,\n",startT,endT,countTo);
 
 
  }

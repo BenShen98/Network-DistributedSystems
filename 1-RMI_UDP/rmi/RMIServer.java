@@ -18,8 +18,8 @@ public class RMIServer extends UnicastRemoteObject implements RMIServerI {
  private int totalMessages = -1;
  private int msgCounter = 0;
 
- private long firstMsgT;
- private long lastMsgT;
+ private long startT;
+ private long endT;
  private boolean logging;
 
 
@@ -33,7 +33,7 @@ public class RMIServer extends UnicastRemoteObject implements RMIServerI {
   // On receipt of first message, initialise the receive buffer
   if (totalMessages == -1) {
    totalMessages = msg.totalMessages;
-   firstMsgT=System.nanoTime();
+   startT=System.currentTimeMillis();
   }
 
   // Log receipt of the message, index&count start from 0
@@ -41,17 +41,17 @@ public class RMIServer extends UnicastRemoteObject implements RMIServerI {
     System.out.printf("%d,", msg.messageNum);
   }
   msgCounter++;
-  lastMsgT=System.nanoTime();
 
 
   // If this is the last expected message, then exit
   // (RMI is based on TCP, order guaranteed)
   if (msg.totalMessages - msg.messageNum == 1) {
-   System.out.printf("\nfirst message received at %d ns", firstMsgT);
-   System.out.printf("\nlast message received at %d ns", lastMsgT);
-   System.out.printf("\ntime diff is %d ns\n", lastMsgT-firstMsgT);
+    endT=System.currentTimeMillis();
+   System.out.printf("\nfirst message received at %d ns", startT);
+   System.out.printf("\nlast message received at %d ns", endT);
+   System.out.printf("\ntime diff is %d ns\n", endT-startT);
 
-   System.err.printf("rmi,%d,%d,%d,%d,%b,\n",firstMsgT,lastMsgT,totalMessages,msg.totalMessages-msgCounter,logging);
+   System.err.printf("rmi,%d,%d,%d,%d,%b,\n",startT,endT,totalMessages,msg.totalMessages-msgCounter,logging);
 
    System.exit(0);
   }

@@ -18,8 +18,8 @@ public class RMIClient {
  public static void main(String[] args) {
 
   RMIServerI server = null;
-  long firstMsgT;
-  long lastMsgT;
+  long startT;
+  long endT;
 
   // Check arguments for Server host and number of messages
   if (args.length < 2) {
@@ -31,7 +31,7 @@ public class RMIClient {
   int countTo = Integer.parseInt(args[1]);
 
   // Initialise Security Manager
-  firstMsgT=System.nanoTime();
+  startT=System.currentTimeMillis();
   try {
    if (System.getSecurityManager() == null) {
     System.setSecurityManager(new SecurityManager());
@@ -51,12 +51,12 @@ public class RMIClient {
   } catch (Exception e) {
    if (e.getCause() instanceof EOFException) {
     //server received all file, shutdown
-    lastMsgT=System.nanoTime();
-    System.out.printf("\nfirst message received at %d ns", firstMsgT);
-    System.out.printf("\nlast message received at %d ns", lastMsgT);
-    System.out.printf("\ntime diff is %d ns\n", lastMsgT-firstMsgT);
+    endT=System.currentTimeMillis();
+    System.out.printf("\nfirst message received at %d ns", startT);
+    System.out.printf("\nlast message received at %d ns", endT);
+    System.out.printf("\ntime diff is %d ns\n", endT-startT);
 
-    System.err.printf("rmi,%d,%d,%d,\n",firstMsgT,lastMsgT,countTo);
+    System.err.printf("rmi,%d,%d,%d,\n",startT,endT,countTo);
 
 
     System.exit(0);

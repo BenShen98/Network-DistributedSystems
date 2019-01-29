@@ -22,8 +22,8 @@ public class UDPServer {
  private boolean[] receivedMsg = null; //ptr
  private boolean terminate = false;
 
- private long firstMsgT;
- private long lastMsgT;
+ private long startT;
+ private long endT;
 
  boolean logging;
 
@@ -57,13 +57,13 @@ public class UDPServer {
    }
   }
   System.out.printf("\n### end of missed packet, %d missed in total ###", countdownMessages);
-  System.out.printf("\nfirst message received at %d ns", firstMsgT);
-  System.out.printf("\nlast message received at %d ns", lastMsgT);
-  System.out.printf("\ntime diff is %d ns\n", lastMsgT-firstMsgT);
+  System.out.printf("\nfirst message received at %d ns", startT);
+  System.out.printf("\nlast message received at %d ns", endT);
+  System.out.printf("\ntime diff is %d ns\n", endT-startT);
 
   //feed to bash script, output as csv file
-  // firstMsgT, lastMsgT, totlMsg, receivedMsg
-  System.err.printf("udp,%d,%d,%d,%d,%b,\n",firstMsgT,lastMsgT,totalMessages,countdownMessages,logging);
+  // startT, endT, totlMsg, receivedMsg
+  System.err.printf("udp,%d,%d,%d,%d,%b,\n",startT,endT,totalMessages,countdownMessages,logging);
 
  }
 
@@ -77,7 +77,7 @@ public class UDPServer {
 
    // On receipt of first message, initialise the receive buffer
    if (totalMessages == -1) {
-    firstMsgT=System.nanoTime();
+    startT=System.currentTimeMillis();
     totalMessages = msg.totalMessages;
     receivedMsg = new boolean[totalMessages];
     countdownMessages = totalMessages;
@@ -89,7 +89,7 @@ public class UDPServer {
   }
 
    receivedMsg[msg.messageNum] = true;
-   lastMsgT=System.nanoTime();
+   endT=System.currentTimeMillis();  //can only put here, dont know when will it finish
    countdownMessages--;
 
    // If this is the last expected message, then exit
