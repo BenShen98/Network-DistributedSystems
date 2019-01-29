@@ -50,6 +50,9 @@ public class UDPClient {
   System.out.printf("\nlast message received at %d ns", lastMsgT);
   System.out.printf("\ntime diff is %d ns\n", lastMsgT-firstMsgT);
 
+  System.err.printf("udp,%d,%d,%d,\n",firstMsgT,lastMsgT,countTo);
+
+
  }
 }
 
@@ -77,7 +80,6 @@ class UDPClientInst {
    for (int tries = 0; tries < countTo; tries++) {
     MessageInfo msg = new MessageInfo(countTo, tries);
     send(msg.toString(), serverAddr, recvPort);
-    idel(sleepMilli);
    }
 
 
@@ -104,11 +106,4 @@ class UDPClientInst {
   }
  }
 
- private static void idel(int milli) {
-	try {
-	 Thread.sleep(milli);
-	} catch (InterruptedException ex) {
-	 Thread.currentThread().interrupt();
-	}
- }
 }

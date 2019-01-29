@@ -12,7 +12,6 @@ import common.MessageInfo;
 
 public class RMIClient {
 
- private static final int sleepMilli = 100;
  private static final int registryPort = 1099;
 
 
@@ -43,10 +42,10 @@ public class RMIClient {
    server = (RMIServerI) registry.lookup(urlServer);
 
    //Attempt to send messages the specified number of times
+   //When server receives all data, server will shutdown, which will cause an EOFException
    for (int tries = 0; tries < countTo; tries++) {
     MessageInfo msg = new MessageInfo(countTo, tries);
     server.receiveMessage(msg);
-    idel(sleepMilli);
    }
 
   } catch (Exception e) {
@@ -57,6 +56,9 @@ public class RMIClient {
     System.out.printf("\nlast message received at %d ns", lastMsgT);
     System.out.printf("\ntime diff is %d ns\n", lastMsgT-firstMsgT);
 
+    System.err.printf("rmi,%d,%d,%d,\n",firstMsgT,lastMsgT,countTo);
+
+
     System.exit(0);
 
    } else {
@@ -65,11 +67,4 @@ public class RMIClient {
   }
  }
 
- private static void idel(int milli) {
-  try {
-   Thread.sleep(milli);
-  } catch (InterruptedException ex) {
-   Thread.currentThread().interrupt();
-  }
- }
 }

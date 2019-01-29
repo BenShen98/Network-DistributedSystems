@@ -14,7 +14,7 @@ public class UDPServer {
 
  // Define constant
  private static final int bufSize = 1000;
- private static final int timeout = 20000;
+ private static final int timeout = 5000;
 
  private DatagramSocket recvSoc;
  private int totalMessages = -1;
@@ -24,6 +24,8 @@ public class UDPServer {
 
  private long firstMsgT;
  private long lastMsgT;
+
+ boolean logging;
 
 
  private void run() {
@@ -59,11 +61,9 @@ public class UDPServer {
   System.out.printf("\nlast message received at %d ns", lastMsgT);
   System.out.printf("\ntime diff is %d ns\n", lastMsgT-firstMsgT);
 
-
-
-
-  //return code (return no. of message lost)
-  System.exit(countdownMessages); //will only display last byte
+  //feed to bash script, output as csv file
+  // firstMsgT, lastMsgT, totlMsg, receivedMsg
+  System.err.printf("udp,%d,%d,%d,%d,%b,\n",firstMsgT,lastMsgT,totalMessages,countdownMessages,logging);
 
  }
 
@@ -84,7 +84,10 @@ public class UDPServer {
    }
 
    // Log receipt of the message, (index&count start from 0)
-   System.out.printf("%d,", msg.messageNum);
+   if(logging){
+    System.out.printf("%d,", msg.messageNum);
+  }
+
    receivedMsg[msg.messageNum] = true;
    lastMsgT=System.nanoTime();
    countdownMessages--;
@@ -100,7 +103,8 @@ public class UDPServer {
  }
 
 
- public UDPServer(int rp) {
+ public UDPServer(int rp, boolean _logging) {
+   logging=_logging;
   // Initialise UDP socket for receiving data.
   try {
    recvSoc = new DatagramSocket(rp);
@@ -116,6 +120,7 @@ public class UDPServer {
 
  public static void main(String args[]) {
   int recvPort;
+  boolean logging=true;
 
   // Get the parameters from command line
   if (args.length < 1) {
@@ -124,8 +129,13 @@ public class UDPServer {
   }
   recvPort = Integer.parseInt(args[0]);
 
+  if(args.length == 2){
+    // disable logging if contain 2 args
+    logging=false;
+  }
+
   // Construct Server object and start it by calling run().
-  UDPServer server = new UDPServer(recvPort);
+  UDPServer server = new UDPServer(recvPort, logging);
   server.run();
 
  }

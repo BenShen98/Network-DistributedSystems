@@ -20,10 +20,12 @@ public class RMIServer extends UnicastRemoteObject implements RMIServerI {
 
  private long firstMsgT;
  private long lastMsgT;
+ private boolean logging;
 
 
- public RMIServer() throws RemoteException {
+ public RMIServer(boolean _logging) throws RemoteException {
   super();
+  logging=_logging;
  }
 
  public void receiveMessage(MessageInfo msg) throws RemoteException {
@@ -35,7 +37,9 @@ public class RMIServer extends UnicastRemoteObject implements RMIServerI {
   }
 
   // Log receipt of the message, index&count start from 0
-  System.out.printf("%d,", msg.messageNum);
+  if(logging){
+    System.out.printf("%d,", msg.messageNum);
+  }
   msgCounter++;
   lastMsgT=System.nanoTime();
 
@@ -46,6 +50,9 @@ public class RMIServer extends UnicastRemoteObject implements RMIServerI {
    System.out.printf("\nfirst message received at %d ns", firstMsgT);
    System.out.printf("\nlast message received at %d ns", lastMsgT);
    System.out.printf("\ntime diff is %d ns\n", lastMsgT-firstMsgT);
+
+   System.err.printf("rmi,%d,%d,%d,%d,%b,\n",firstMsgT,lastMsgT,totalMessages,msg.totalMessages-msgCounter,logging);
+
    System.exit(0);
   }
 
@@ -55,6 +62,12 @@ public class RMIServer extends UnicastRemoteObject implements RMIServerI {
  public static void main(String[] args) {
   RMIServer rmis = null;
 
+  boolean logging = true;
+  if(args.length == 1){
+    // disable logging if contain 1 args
+    logging=false;
+  }
+
   // Initialise Security Manager
   if (System.getSecurityManager() == null) {
    System.setSecurityManager(new SecurityManager());
@@ -62,7 +75,7 @@ public class RMIServer extends UnicastRemoteObject implements RMIServerI {
 
   try {
    // Instantiate the server class
-   rmis = new RMIServer(); // remote as it extend UnicastRemoteObject
+   rmis = new RMIServer(logging); // remote as it extend UnicastRemoteObject
 
    // Bind to RMI registry
    rebindServer(serverURL, rmis);
@@ -72,6 +85,8 @@ public class RMIServer extends UnicastRemoteObject implements RMIServerI {
    System.err.println("Server creation exception:" + e);
   }
  }
+
+
 
  protected static void rebindServer(String serverURL, RMIServer server) throws Exception {
   Registry registry = LocateRegistry.createRegistry(registryPort);
