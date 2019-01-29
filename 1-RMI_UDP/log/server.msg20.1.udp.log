@@ -1,0 +1,10 @@
+UDPServer ready
+8,9,10,11,12,13,14,15,16,17,18,19,Exception: Receive timed out
+
+
+### missed packet ###
+0,1,2,3,4,5,6,7,
+### end of missed packet, 8 missed in total ###
+first message received at 884069638376 ns
+last message received at 884090363439 ns
+time diff is 20725063 ns
